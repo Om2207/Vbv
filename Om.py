@@ -1,6 +1,7 @@
 import logging
 from telegram import Update, InputFile
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext
+import telegram.ext.filters as filters
 import requests
 import os
 
@@ -69,7 +70,7 @@ def handle_message(update: Update, context: CallbackContext) -> None:
 
 # Handle txt file upload
 def handle_document(update: Update, context: CallbackContext) -> None:
-    file = context.bot.getFile(update.message.document.file_id)
+    file = context.bot.get_file(update.message.document.file_id)
     file_path = 'input_ccs.txt'
     file.download(file_path)
     
@@ -93,8 +94,8 @@ def main() -> None:
     dispatcher = updater.dispatcher
     
     dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(filters=Filters.text & ~Filters.command, callback=handle_message))
-    dispatcher.add_handler(MessageHandler(filters=Filters.document.mime_type("text/plain"), callback=handle_document))
+    dispatcher.add_handler(MessageHandler(filters.Text() & ~filters.COMMAND, handle_message))
+    dispatcher.add_handler(MessageHandler(filters.Document.MIME_TYPE("text/plain"), handle_document))
     
     dispatcher.add_error_handler(error)
     
@@ -103,4 +104,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-  
+    
